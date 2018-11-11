@@ -108,7 +108,7 @@ post_mspline_simplex <- as.array(fit_mspline_simplex)
 
 $$h_0(t;\gamma;k) = \sum_{j=1}^{m} M_j(t;k)\gamma_j$$ 
 
-$$I_j{t;k} = \int_{0}^{t} M_j(u;k) \rm{d}u$$
+$$I_j(t;k) = \int_{0}^{t} M_j(u;k) \rm{d}u$$
 
 $$ H_0(t;\gamma;k) = \sum_{j=1}^{m} I_j(t;k)\gamma_j$$
 
@@ -185,7 +185,6 @@ data {
     matrix[N_uncensored,m] m_spline_basis_evals_uncensored;                  
     matrix[N_uncensored,m] i_spline_basis_evals_uncensored;   
     matrix[N_censored,m] i_spline_basis_evals_censored;
-    int<lower=0, upper=1> condition;
 }
 parameters {
     simplex[m] gammas;       
@@ -195,11 +194,9 @@ parameters {
 model {
     betas ~ normal(0,1);
     intercept   ~ normal(0,5);
-    if(condition) {
-        target += -(i_spline_basis_evals_censored*gammas) .* exp(X_censored*betas + intercept);
-        target += -(i_spline_basis_evals_uncensored*gammas) .* exp(X_uncensored*betas + intercept);
-	    target +=  log(m_spline_basis_evals_uncensored*gammas) + X_uncensored*betas + intercept;
-    }
+    target += -(i_spline_basis_evals_censored*gammas) .* exp(X_censored*betas + intercept);
+    target += -(i_spline_basis_evals_uncensored*gammas) .* exp(X_uncensored*betas + intercept);
+	  target +=  log(m_spline_basis_evals_uncensored*gammas) + X_uncensored*betas + intercept;
 }
 ```
 
@@ -427,9 +424,9 @@ cowplot::plot_grid(p1,p2,p3,p4,align = "h")
 color_scheme_set("pink")
 bayesplot::bayesplot_grid(
   plots = list(
-    ppc_stat(surv_times_train, surv_times_rep_exp, binwidth = 1, stat = "mean"),
-    ppc_stat(surv_times_train, surv_times_rep_gamma, binwidth = 1, stat = "mean"),
-    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , binwidth = 1, stat = "mean")
+    ppc_stat(surv_times_train, surv_times_rep_exp, binwidth = 1, stat = "mean")+xlim(c(40,130)),
+    ppc_stat(surv_times_train, surv_times_rep_gamma, binwidth = 1, stat = "mean")+xlim(c(40,130)),
+    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , binwidth = 1, stat = "mean")+xlim(c(40,130))
     ),
   titles = c("Exponential","Gamma", "MSpline"),
   legends = FALSE,
@@ -445,9 +442,9 @@ bayesplot::bayesplot_grid(
 color_scheme_set("pink")
 bayesplot::bayesplot_grid(
   plots = list(
-    ppc_stat(surv_times_train, surv_times_rep_exp, binwidth = 1, stat = "median"),
-    ppc_stat(surv_times_train, surv_times_rep_gamma, binwidth = 1, stat = "median"),
-    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , binwidth = 1, stat = "median")
+    ppc_stat(surv_times_train, surv_times_rep_exp, binwidth = 1, stat = "median")+xlim(c(30,160)),
+    ppc_stat(surv_times_train, surv_times_rep_gamma, binwidth = 1, stat = "median")+xlim(c(30,160)),
+    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , binwidth = 1, stat = "median")+xlim(c(30,160))
   ),
   titles = c("Exponential","Gamma", "MSpline"),
   legends = FALSE,
@@ -463,9 +460,9 @@ bayesplot::bayesplot_grid(
 color_scheme_set("pink")
 bayesplot::bayesplot_grid(
   plots = list(
-    ppc_stat(surv_times_train, surv_times_rep_exp, binwidth = 1, stat = "sd"),
-    ppc_stat(surv_times_train, surv_times_rep_gamma, binwidth = 1, stat = "sd"),
-    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , binwidth = 1, stat = "sd")
+    ppc_stat(surv_times_train, surv_times_rep_exp, binwidth = 1, stat = "sd")+xlim(c(20,80)),
+    ppc_stat(surv_times_train, surv_times_rep_gamma, binwidth = 1, stat = "sd")+xlim(c(20,80)),
+    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , binwidth = 1, stat = "sd")+xlim(c(20,80))
   ),
   titles = c("Exponential","Gamma", "MSpline"),
   legends = FALSE,
@@ -480,9 +477,9 @@ bayesplot::bayesplot_grid(
 color_scheme_set("pink")
 bayesplot::bayesplot_grid(
   plots = list(
-    ppc_stat(surv_times_train, surv_times_rep_exp, binwidth = 1, stat = "min"),
-    ppc_stat(surv_times_train, surv_times_rep_gamma, binwidth = 1, stat = "min"),
-    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , binwidth = 1, stat = "min")
+    ppc_stat(surv_times_train, surv_times_rep_exp, binwidth = 1, stat = "min")+xlim(c(0,40)),
+    ppc_stat(surv_times_train, surv_times_rep_gamma, binwidth = 1, stat = "min")+xlim(c(0,40)),
+    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , binwidth = 1, stat = "min")+xlim(c(0,40))
   ),
   titles = c("Exponential","Gamma", "MSpline"),
   legends = FALSE,
@@ -497,9 +494,9 @@ bayesplot::bayesplot_grid(
 color_scheme_set("pink")
 bayesplot::bayesplot_grid(
   plots = list(
-    ppc_stat(surv_times_train, surv_times_rep_exp, binwidth = 1, stat = "max"),
-    ppc_stat(surv_times_train, surv_times_rep_gamma, binwidth = 1, stat = "max"),
-    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , binwidth = 1, stat = "max")
+    ppc_stat(surv_times_train, surv_times_rep_exp, binwidth = 1, stat = "max")+xlim(c(120,230)),
+    ppc_stat(surv_times_train, surv_times_rep_gamma, binwidth = 1, stat = "max")+xlim(c(120,230)),
+    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , binwidth = 1, stat = "max")+xlim(c(120,230))
   ),
   titles = c("Exponential","Gamma", "MSpline"),
   legends = FALSE,
@@ -535,9 +532,9 @@ km70 <- function(st) {
 color_scheme_set("pink")
 bayesplot::bayesplot_grid(
   plots = list(
-    ppc_stat(surv_times_train, surv_times_rep_exp, stat = "km70"),
-    ppc_stat(surv_times_train, surv_times_rep_gamma, stat = "km70"),
-    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , stat = "km70")
+    ppc_stat(surv_times_train, surv_times_rep_exp, stat = "km70")+xlim(c(0.5,1)),
+    ppc_stat(surv_times_train, surv_times_rep_gamma, stat = "km70")+xlim(c(0.5,1)),
+    ppc_stat(surv_times_train, surv_times_rep_mspline_simplex , stat = "km70")+xlim(c(0.5,1))
   ),
   titles = c("Exponential","Gamma", "MSpline"),
   legends = FALSE,
